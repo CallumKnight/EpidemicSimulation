@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "Plot.h"
 #include "Simulation.h"
+#include "Data.h"
 
 class ofApp : public ofBaseApp{
 
@@ -26,6 +27,5 @@ class ofApp : public ofBaseApp{
 	private:
 		Plot plot;
 		Simulation simulation;
-
-		
+		Data snapshot;
 };

@@ -2,17 +2,30 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    
+
+    snapshot.susceptible = 1000;
+    snapshot.recovered = 0;
+    snapshot.infectious = 0;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
+    snapshot.susceptible -= 5;
+    snapshot.recovered += 1;
+    snapshot.infectious += 4;
+
+    if(snapshot.susceptible <= 0)
+    {
+        snapshot.susceptible = 1000;
+        snapshot.recovered = 0;
+        snapshot.infectious = 0;
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    plot.draw(ofGetWidth()/9.0, ofGetHeight()/5.0, ofGetWidth()/3.0, 3*ofGetHeight()/5.0);
+    plot.draw(ofGetWidth()/9.0, ofGetHeight()/5.0, ofGetWidth()/3.0, 3*ofGetHeight()/5.0, snapshot);
     simulation.draw(5*ofGetWidth()/9.0, ofGetHeight()/5.0, ofGetWidth()/3.0, 3*ofGetHeight()/5.0);
 }
 
