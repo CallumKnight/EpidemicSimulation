@@ -42,6 +42,7 @@ void Plot::draw(float x, float y, float w, float h, Data d){
     float dataPointWidth = w/data.size();
     float dataPointHeight = h/(d.susceptible+d.infectious+d.recovered);
 
+    ofFill();
     for(int i = 0; i < data.size(); i++)
     {
         ofSetColor(50, 150, 255); // Blue

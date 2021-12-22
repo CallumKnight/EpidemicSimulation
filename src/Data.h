@@ -5,3 +5,15 @@ typedef struct data {
 	int infectious;
 	int recovered;
 } Data;
+
+enum HealthStatus {
+	susceptible,
+	infectious,
+	recovered
+};
+
+typedef struct host {
+	float x;
+	float y;
+	HealthStatus status;
+} Host;
