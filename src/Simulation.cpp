@@ -16,15 +16,17 @@ void Simulation::setup(float x, float y, float w, float h, int pop){
     // Set simulation parameters
     this->x = x;
     this->y = y;
-    width = w;
-    height = h;
+    this->w = w;
+    this->h = h;
 
     // Randomly distribute the hosts within the simulation area
     for(int i = 0; i < pop; i++)
     {
         Host host;
-        host.x = rand() % static_cast<int>(width-1) + 1;
-        host.y = rand() % static_cast<int>(height-1) + 1;
+        host.x = rand() % static_cast<int>(w - 1) + 1;
+        host.y = rand() % static_cast<int>(h - 1) + 1;
+        host.destinationX = host.x;
+        host.destinationY = host.y;
         host.status = susceptible;
 
         // Set first host to be infectious
@@ -36,11 +38,128 @@ void Simulation::setup(float x, float y, float w, float h, int pop){
         hosts.push_back(host);
     }
 
+    // Update snapshot data
+    snapshot.susceptible = 0;
+    snapshot.infectious = 0;
+    snapshot.recovered = 0;
+
+    for(Host& host : hosts)
+    {
+        switch(host.status)
+        {
+            case susceptible:
+                snapshot.susceptible++;
+                break;
+
+            case infectious:
+                snapshot.infectious++;
+                break;
+
+            case recovered:
+                snapshot.recovered++;
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 //--------------------------------------------------------------
 void Simulation::update(){
 
+    // Update host positions
+    for(Host& host : hosts)
+    {
+        // If host has reached it's set destination
+        if((static_cast<int>(host.destinationX) == static_cast<int>(host.x)) && (static_cast<int>(host.destinationY) == static_cast<int>(host.y)))
+        {   
+            // Calculate a new destination
+            host.destinationX = host.x + (rand() % 21) - 10;
+            host.destinationY = host.y + (rand() % 21) - 10;
+
+            // Ensure destination doesn't cross the boundary
+            if(host.destinationX <= 0)
+            {
+                host.destinationX = 1;
+            }
+            else if(host.destinationX >= w)
+            {
+                host.destinationX = w - 1;
+            }
+
+            if(host.destinationY <= 0)
+            {
+                host.destinationY = 1;
+            }
+            else if(host.destinationY >= h)
+            {
+                host.destinationY = h - 1;
+            }
+        }
+
+        // Move host one step towards destination
+        if(host.destinationX < host.x)
+        {
+            host.x -= 1;
+        }
+        else if(host.destinationX > host.x)
+        {
+            host.x += 1;
+        }
+
+        if(host.destinationY < host.y)
+        {
+            host.y -= 1;
+        }
+        else if(host.destinationY > host.y)
+        {
+            host.y += 1;
+        }
+    }
+
+    // Update spread of infection
+    for(Host& host : hosts)
+    {
+        // If host is infectious check if any susceptible hosts are within it's vicinity
+        if(host.status == infectious)
+        {
+            for(Host& target : hosts)
+            {
+                // If they are within spreading range and are susceptible, pass on the infection
+                if((std::abs(host.x - target.x) <= 1.0) && (std::abs(host.y - target.y) <= 1.0) && (target.status == susceptible))
+                {
+                    target.status = infectious;
+                }
+            }            
+        }
+    }
+
+    // Update snapshot data
+    snapshot.susceptible = 0;
+    snapshot.infectious = 0;
+    snapshot.recovered = 0;
+
+    for(Host& host : hosts)
+    {
+        switch(host.status)
+        {
+            case susceptible:
+                snapshot.susceptible++;
+                break;
+
+            case infectious:
+                snapshot.infectious++;
+                break;
+
+            case recovered:
+                snapshot.recovered++;
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -49,30 +168,36 @@ void Simulation::draw(){
     // Draw simulation zone
     ofSetColor(255);
     ofNoFill();
-    ofDrawRectangle(x, y, width, height);
+    ofDrawRectangle(x, y, w, h);
 
     // Draw hosts
-    for(Host host : hosts)
+    for(Host& host : hosts)
     {
         switch(host.status)
         {
             case susceptible:
                 ofSetColor(50, 150, 255); // Blue
-                ofDrawCircle(x+host.x, y+host.y, 1.0);
+                ofDrawCircle(x + host.x, y + host.y, 1.0);
                 break;
 
             case infectious:
                 ofSetColor(255, 0, 0); // Red
-                ofDrawCircle(x+host.x, y+host.y, 1.0);
+                ofDrawCircle(x + host.x, y + host.y, 1.0);
                 break;
 
             case recovered:
                 ofSetColor(0, 255, 0); // Green
-                ofDrawCircle(x+host.x, y+host.y, 1.0);
+                ofDrawCircle(x + host.x, y + host.y, 1.0);
                 break;
 
             default:
                 break;
         }
     }
+}
+
+//--------------------------------------------------------------
+Data Simulation::getSnapshot(){
+
+    return snapshot;
 }

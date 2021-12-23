@@ -27,5 +27,5 @@ class ofApp : public ofBaseApp{
 	private:
 		Plot plot;
 		Simulation simulation;
-		Data snapshot;
+		// Data snapshot;
 };

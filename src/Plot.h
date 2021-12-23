@@ -8,10 +8,14 @@ class Plot{
 	public:
 		Plot();
 		~Plot();
-		void setup();
-		void update();
-		void draw(float x, float y, float w, float h, Data d);
+		void setup(float x, float y, float w, float h);
+		void update(Data d);
+		void draw(/*Data d*/);
 	
 	private:
+		float x;
+		float y;
+		float w;
+		float h;
 		std::vector<Data> data;
 };
