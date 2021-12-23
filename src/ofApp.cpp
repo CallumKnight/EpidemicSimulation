@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+    srand(time(NULL));
     plot.setup(ofGetWidth()/9.0, ofGetHeight()/5.0, ofGetWidth()/3.0, 3*ofGetHeight()/5.0);
     simulation.setup(5*ofGetWidth()/9.0, ofGetHeight()/5.0, ofGetWidth()/3.0, 3*ofGetHeight()/5.0, 1000);
 }
