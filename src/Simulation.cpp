@@ -27,6 +27,7 @@ void Simulation::setup(float x, float y, float w, float h, int pop){
         host.y = rand() % static_cast<int>(h - 1) + 1;
         host.destinationX = host.x;
         host.destinationY = host.y;
+        host.infectionTime = 0;
         host.status = susceptible;
 
         // Set first host to be infectious
@@ -117,21 +118,33 @@ void Simulation::update(){
             host.y += 1;
         }
     }
-
+    
     // Update spread of infection
     for(Host& host : hosts)
     {
-        // If host is infectious check if any susceptible hosts are within it's vicinity
+        // If still infectious
         if(host.status == infectious)
         {
+            // Check if any susceptible hosts are within vicinity
             for(Host& target : hosts)
             {
-                // If they are within spreading range and are susceptible, pass on the infection
-                if((std::abs(host.x - target.x) <= 1.0) && (std::abs(host.y - target.y) <= 1.0) && (target.status == susceptible))
+                // If there are, pass on the infection
+                if((std::abs(host.x - target.x) <= 2.0) && (std::abs(host.y - target.y) <= 2.0) && (target.status == susceptible))
                 {
                     target.status = infectious;
                 }
-            }            
+            }
+
+            // If recovery time has passed, remove infection
+            if(host.infectionTime >= 200)
+            {
+                host.status = recovered;
+                host.infectionTime = 0;
+            }
+            else
+            {
+                host.infectionTime++;
+            }        
         }
     }
 

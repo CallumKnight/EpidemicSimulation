@@ -14,6 +14,7 @@ typedef struct host {
 	float y;
 	float destinationX;
 	float destinationY;
+	int infectionTime;
 	HealthStatus status;
 } Host;
 
