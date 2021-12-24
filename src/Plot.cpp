@@ -26,7 +26,7 @@ void Plot::update(Data d){
 }
 
 //--------------------------------------------------------------
-void Plot::draw(/*Data d*/){
+void Plot::draw(){
     
     ofFill();
     ofSetColor(255); // White
@@ -56,6 +56,9 @@ void Plot::draw(/*Data d*/){
             ofSetColor(255, 0, 0); // Red
             ofDrawRectangle(x + (i*dataPointWidth), y + ((data[i].susceptible + data[i].recovered)*dataPointHeight), dataPointWidth, data[i].infectious*dataPointHeight);
         }
-    }
-    
+
+        ofSetColor(255); // White
+        ofDrawBitmapString("R0: " + ofToString(data[data.size() - 1].r0), x, y + h + (h/10.0));
+
+    }   
 }

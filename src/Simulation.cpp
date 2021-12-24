@@ -28,6 +28,7 @@ void Simulation::setup(float x, float y, float w, float h, int pop){
         host.destinationX = host.x;
         host.destinationY = host.y;
         host.infectionTime = 0;
+        host.hostsInfected = 0;
         host.status = susceptible;
 
         // Set first host to be infectious
@@ -43,6 +44,7 @@ void Simulation::setup(float x, float y, float w, float h, int pop){
     snapshot.susceptible = 0;
     snapshot.infectious = 0;
     snapshot.recovered = 0;
+    snapshot.r0 = 0;
 
     for(Host& host : hosts)
     {
@@ -76,27 +78,29 @@ void Simulation::update(){
         if((static_cast<int>(host.destinationX) == static_cast<int>(host.x)) && (static_cast<int>(host.destinationY) == static_cast<int>(host.y)))
         {   
             // Calculate a new destination
-            host.destinationX = host.x + (rand() % 21) - 10;
-            host.destinationY = host.y + (rand() % 21) - 10;
+            // host.destinationX = host.x + (rand() % static_cast<int>(2*w + 1)) - w;
+            // host.destinationY = host.y + (rand() % static_cast<int>(2*h + 1)) - h;
+            host.destinationX = rand() % static_cast<int>(w - 1) + 1;
+            host.destinationY = rand() % static_cast<int>(h - 1) + 1;
 
-            // Ensure destination doesn't cross the boundary
-            if(host.destinationX <= 0)
-            {
-                host.destinationX = 1;
-            }
-            else if(host.destinationX >= w)
-            {
-                host.destinationX = w - 1;
-            }
+            // // Ensure destination doesn't cross the boundary
+            // if(host.destinationX <= 0)
+            // {
+            //     host.destinationX = 1;
+            // }
+            // else if(host.destinationX >= w)
+            // {
+            //     host.destinationX = w - 1;
+            // }
 
-            if(host.destinationY <= 0)
-            {
-                host.destinationY = 1;
-            }
-            else if(host.destinationY >= h)
-            {
-                host.destinationY = h - 1;
-            }
+            // if(host.destinationY <= 0)
+            // {
+            //     host.destinationY = 1;
+            // }
+            // else if(host.destinationY >= h)
+            // {
+            //     host.destinationY = h - 1;
+            // }
         }
 
         // Move host one step towards destination
@@ -118,33 +122,36 @@ void Simulation::update(){
             host.y += 1;
         }
     }
-    
+
     // Update spread of infection
     for(Host& host : hosts)
     {
         // If still infectious
         if(host.status == infectious)
         {
-            // Check if any susceptible hosts are within vicinity
-            for(Host& target : hosts)
-            {
-                // If there are, pass on the infection
-                if((std::abs(host.x - target.x) <= 2.0) && (std::abs(host.y - target.y) <= 2.0) && (target.status == susceptible))
-                {
-                    target.status = infectious;
-                }
-            }
-
             // If recovery time has passed, remove infection
-            if(host.infectionTime >= 200)
+            if(host.infectionTime >= 300)
             {
                 host.status = recovered;
                 host.infectionTime = 0;
             }
             else
             {
+                // Check if any susceptible hosts are within vicinity
+                for(Host& target : hosts)
+                {
+                    // If so, determine if infection should be passed on
+                    if((std::abs(host.x - target.x) <= 3.0) && (std::abs(host.y - target.y) <= 3.0) && (target.status == susceptible))
+                    {
+                        if((rand() % 101) >= 50)
+                        {
+                            target.status = infectious;
+                            host.hostsInfected++;
+                        }
+                    }
+                }
                 host.infectionTime++;
-            }        
+            }         
         }
     }
 
@@ -152,6 +159,7 @@ void Simulation::update(){
     snapshot.susceptible = 0;
     snapshot.infectious = 0;
     snapshot.recovered = 0;
+    snapshot.r0 = 0;
 
     for(Host& host : hosts)
     {
@@ -163,6 +171,7 @@ void Simulation::update(){
 
             case infectious:
                 snapshot.infectious++;
+                snapshot.r0 += host.hostsInfected;
                 break;
 
             case recovered:
@@ -172,6 +181,11 @@ void Simulation::update(){
             default:
                 break;
         }
+    }
+
+    if(snapshot.infectious != 0)
+    {
+        snapshot.r0 /= snapshot.infectious;
     }
 }
 
